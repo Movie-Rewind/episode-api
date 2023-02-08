@@ -2,27 +2,35 @@ name: PROD-ACTION
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
-  test: 
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [ 18.x ]
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: copy npmrc
-      run: cd src && echo "${{secrets.NPMRC}}" > .npmrc
-    
-    - name: install dependencies
-      run: cd src && pwd && npm ci
-    - name: run lint
-      run: cd src && npm run lint
-    - name: run tests
-      run: cd src && npm run test
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: copy npmrc
+        run: cd src && echo "${{secrets.NPMRC}}" > .npmrc
+
+      - name: install dependencies
+        run: cd src && pwd && npm ci
+      - name: run lint
+        run: cd src && npm run lint
+      - name: run tests
+        run: cd src && npm run test
+      - uses: actions/checkout@v1
+      - name: Push to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: cd ${{ secrets.PROJECT_PATH }} && git fetch && git pull && cd ./src && echo "${{secrets.NPMRC}}" > .npmrc && echo "MONGO_URI=${{ secrets.MONGO_URI }}" > .env && npm i && pm2 restart all && sudo systemctl restart nginx

@@ -10,8 +10,9 @@ app.use(helmet());
 app.use(express.json());
 
 const internalRoutes = require('./infrastructure/http/internal-controller.js');
-
+const episodesRoutes = require('./infrastructure/http/episode-controller');
 app.use('/internal', internalRoutes);
+app.use('/api/v1/episodes', episodesRoutes);
 
 const signals = ['SIGTERM', 'SIGINT', 'SIGUSR1', 'SIGUSR2'];
 signals.map((signal) => process.on(signal, () => {
@@ -20,5 +21,5 @@ signals.map((signal) => process.on(signal, () => {
 }));
 
 app.listen(port, () => {
-	console.log(`Template api listening: [${port}]`);
+	console.log(`Episode api listening: [${port}]`);
 });
