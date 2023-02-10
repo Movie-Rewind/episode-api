@@ -9,10 +9,10 @@ class SaveEpisode {
 	}
 
 	async save(episode) {
-		const episodeDomain = new Episode(this._parseIds(episode));
+		const episodeDocument = await this.episodeRepository.findByOmdbId(episode.id);
 
-		const episodeDocument = await this.episodeRepository.findByOmdbId(episode.omdb_id);
 		await this._checkIfEpisodeExists(episodeDocument);
+		const episodeDomain = new Episode(this._parseIds(episode));
 
 		await this.episodeRepository.save(episodeDomain);
 
